@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tech 1: PM thời AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--ink:#1B2330;--paper:#F7F1E5;--paper2:#EDE4D2;--tomato:#B93710;--muted:#56606D;--line:#CFC3AC;--night:#18212E;--cream:#F7F1E5;--soft:#C8CFD8;--peach:#F4A988;--sans:'Be Vietnam Pro',Arial,sans-serif;--mono:'JetBrains Mono','Courier New',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#0E131B;overflow:hidden;font-family:var(--sans)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+.slide{position:absolute;inset:0;width:1920px;height:1080px;padding:92px 128px 128px;background:var(--paper);color:var(--ink);display:none;flex-direction:column;gap:40px;overflow:hidden}
+.slide.active{display:flex}
+.slide.night{background:var(--night);color:var(--cream)}
+.slide.hot{background:var(--tomato);color:var(--cream)}
+.slide.center{justify-content:center;padding:128px}
+.eyebrow{font:600 26px/1.2 var(--mono);letter-spacing:.5px;color:var(--tomato);text-transform:uppercase}
+.night .eyebrow{color:var(--peach)}
+h1{font-size:108px;font-weight:800;line-height:1.1;letter-spacing:-1.5px}
+h2{font-size:68px;font-weight:800;line-height:1.14;letter-spacing:-.5px;margin-top:-26px}
+.lead{font-size:40px;line-height:1.35}
+.soft{color:var(--soft)}.muted{color:var(--muted)}
+.foot{position:absolute;left:128px;right:128px;bottom:56px;display:flex;justify-content:space-between;font:400 24px var(--mono);color:var(--muted)}
+.night .foot,.hot .foot{display:none}
+.fill{flex:1;display:flex;flex-direction:column;justify-content:center;gap:40px;min-height:0}
+.cols{display:grid;gap:44px}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.col{border-top:8px solid var(--ink);padding-top:24px;display:flex;flex-direction:column;gap:16px}
+.col h3{font-size:40px;font-weight:800;line-height:1.2}
+.col p{font-size:31px;line-height:1.38;color:var(--muted)}
+.col p b{color:var(--ink)}
+.col.alt{border-top-color:var(--tomato)}
+.ticket{background:var(--ink);color:var(--cream);font-size:36px;font-weight:700;line-height:1.32;padding:32px 44px;border-radius:10px}
+ol.num{list-style:none;counter-reset:n;display:flex;flex-direction:column}
+ol.num li{counter-increment:n;display:grid;grid-template-columns:76px 1fr;align-items:baseline;font-size:36px;line-height:1.35;padding:17px 0;border-bottom:2px dashed var(--line)}
+ol.num li:last-child{border-bottom:0}
+ol.num li::before{content:counter(n);font:600 34px var(--mono);color:var(--tomato)}
+ol.num.plain li::before{content:none}
+ol.num.lg li{font-size:44px;padding:22px 0}
+ol.num.sm li{font-size:32px;padding:14px 0;grid-template-columns:60px 1fr}
+table{border-collapse:collapse;width:100%}
+th{font:600 26px var(--mono);text-transform:uppercase;text-align:left;color:var(--tomato);padding:0 24px 14px 0;border-bottom:6px solid var(--ink)}
+td{font-size:33px;line-height:1.3;padding:20px 24px 20px 0;border-bottom:2px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700}
+.receipt{background:#FFFDF7;color:var(--ink);font-family:var(--mono);font-size:29px;line-height:1.5;padding:40px 44px;box-shadow:0 10px 28px rgba(27,35,48,.16);border-top:6px dashed var(--line);border-bottom:6px dashed var(--line)}
+.receipt .t{font-weight:600;text-align:center;padding-bottom:16px;border-bottom:2px dashed var(--line);margin-bottom:16px}
+.receipt .r{display:flex;justify-content:space-between;gap:24px}
+.receipt .total{font-weight:600;margin-top:16px;padding-top:16px;border-top:2px dashed var(--line)}
+.code{background:var(--night);color:var(--cream);font:400 31px/1.55 var(--mono);padding:40px 44px;border-radius:10px;white-space:pre}
+.ph{display:inline-block;background:#FFF0B8;color:#5B4300;border:3px dashed #A67C00;border-radius:8px;padding:2px 12px;font-weight:600}
+.tag{font:600 26px var(--mono);color:var(--tomato)}
+.mono{font-family:var(--mono)}
+svg text{font-family:var(--sans);fill:var(--ink)}
+#ui{position:fixed;right:18px;bottom:14px;display:flex;align-items:center;gap:8px;font:13px var(--mono);color:#E8E2D6;background:rgba(14,19,27,.82);padding:6px 10px;border-radius:8px;z-index:5}
+#ui button{background:transparent;color:inherit;border:1px solid #6A7482;border-radius:6px;min-width:34px;height:30px;cursor:pointer;font:inherit}
+#notes{position:fixed;left:18px;right:220px;bottom:14px;max-height:30vh;overflow:auto;background:rgba(14,19,27,.94);color:#F7F1E5;font:16px/1.45 var(--sans);padding:12px 16px;border-radius:8px;z-index:4;display:none}
+#notes.on{display:block}
+@media print{@page{size:1920px 1080px;margin:0}html,body{height:auto;overflow:visible;background:none}#ui,#notes{display:none!important}#stage{position:static;transform:none!important;width:auto;height:auto}.slide{display:flex!important;position:relative;break-after:page;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+#nbtn,#notes{display:none!important}
+</style>
+</head>
+<body>
+<main id="stage">
+
+<section class="slide night center">
+  <p class="eyebrow">H4TF: PM Academy 2026, Track Tech, Buổi 1</p>
+  <h1>Làm PM khi AI viết spec nhanh hơn bạn</h1>
+  <p class="lead soft">Kelvin Truong, COO &amp; CPO, Gaian, 30/11/2026</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Diễn giả</p><h2>Kelvin Truong</h2>
+  <div class="fill"><div style="display:grid;grid-template-columns:400px 1fr;gap:72px;align-items:center">
+    <div class="ph" style="height:500px;display:flex;align-items:center;justify-content:center;font-size:140px;font-weight:800;text-align:center">KT</div>
+    <ol class="num plain">
+      <li style="grid-template-columns:1fr"><span><b>Founder, COO &amp; CPO tại Gaian.</b> Gaian làm hạ tầng thanh toán stablecoin tại châu Á.</span></li>
+      <li style="grid-template-columns:1fr"><span><b>Product Manager tại Hex Trust,</b> công ty lưu ký crypto có giấy phép.</span></li>
+      <li style="grid-template-columns:1fr"><span><b>Product Owner tại Starpunk.</b></span></li>
+      <li style="grid-template-columns:1fr"><span><b>Member của Superteam Vietnam.</b></span></li>
+    </ol>
+  </div></div>
+</section>
+
+<section class="slide hot center">
+  <h1 style="font-size:112px">Anh vừa nhờ AI viết spec cho nút “Hủy món”.<br>Mất 30 giây.</h1>
+  <p class="lead">Spec này đúng chưa? Trả lời trong chat: Đúng, Sai, hoặc Không biết.</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Mở đầu</p><h2>Nó trông rất ổn</h2>
+  <div class="fill">
+    <div class="code">User story: Là khách tại bàn, tôi muốn hủy món đã gọi,
+            để không phải trả tiền món tôi không cần.
+AC1: Món chưa làm thì hủy được, tổng tiền giảm.
+AC2: Món đang làm thì hiện thông báo "Không thể hủy".
+Edge case: mất mạng, bấm 2 lần, hủy lúc bếp vừa nhận.</div>
+    <p class="ticket">Câu hỏi chưa ai hỏi: vì sao khách muốn hủy?</p>
+  </div>
+</section>
+
+<section class="slide night center">
+  <h1 style="font-size:96px">Khi viết gần như miễn phí, phần khó là biết nên viết cái gì.</h1>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Việc gì đã đổi</p><h2>Chia việc của PM thành 2 cột</h2>
+  <div class="fill">
+    <div class="cols c2">
+      <div class="col"><h3>AI làm tốt</h3><p>Viết PRD, user story, ticket.</p><p>Vẽ wireframe.</p><p>Tóm tắt 50 cuộc phỏng vấn.</p><p>Đọc số liệu, viết báo cáo.</p></div>
+      <div class="col alt"><h3 style="color:var(--tomato)">Vẫn là việc của bạn</h3><p style="color:var(--ink)">Chọn vấn đề nào đáng giải.</p><p style="color:var(--ink)">Nghe ra điều người dùng không nói.</p><p style="color:var(--ink)">Quyết khi chưa đủ dữ liệu.</p><p style="color:var(--ink)">Chịu trách nhiệm khi sai.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Hôm nay</p><h2>6 việc mình tập hôm nay</h2>
+  <div class="fill"><div style="display:grid;grid-template-columns:1fr 560px;gap:88px;align-items:center">
+    <ol class="num">
+      <li>Chọn đúng vấn đề.</li>
+      <li>Nghe điều người dùng thật sự cần.</li>
+      <li>Hiểu hệ thống và dòng tiền.</li>
+      <li>Quyết khi chưa chắc.</li>
+      <li>Nói không.</li>
+      <li>Giao việc cho dev và AI agent.</li>
+    </ol>
+    <div class="receipt"><div class="t">PHIẾU GỌI MÓN, BÀN TECH 1</div>
+      <div class="r"><span>Session 1</span><span>50 phút</span></div>
+      <div class="r"><span>Nghỉ</span><span>5 phút</span></div>
+      <div class="r"><span>Session 2</span><span>65 phút</span></div>
+      <div class="r"><span>Hỏi đáp</span><span>15 phút</span></div>
+      <div class="r total"><span>Có thực hành</span><span>18 phút</span></div>
+    </div>
+  </div></div>
+</section>
+
+<section class="slide night center">
+  <p class="eyebrow">Phần 1</p><h1>Chọn đúng vấn đề</h1>
+  <p class="lead soft">Làm tốt một vấn đề sai vẫn là thất bại.</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 1: Chọn đúng vấn đề</p><h2>Khách xin nút Hủy món. Vì sao?</h2>
+  <div class="fill">
+    <div class="cols c3">
+      <div class="col"><h3>Gọi nhầm</h3><p>Menu khó đọc, ngón tay bấm trượt.</p></div>
+      <div class="col"><h3>Đợi lâu</h3><p>Món ra chậm, khách muốn đổi món nhanh hơn.</p></div>
+      <div class="col"><h3>Đổi ý</h3><p>Khách thấy món bàn bên ngon hơn.</p></div>
+    </div>
+    <p class="ticket">Mỗi lý do dẫn tới một sản phẩm khác.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 1: Chọn đúng vấn đề</p><h2>Có khi không cần nút Hủy</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:28%">Lý do thật</th><th>Cách giải khác</th></tr>
+      <tr><td>Gọi nhầm</td><td>Màn xác nhận trước khi gửi đơn vào bếp.</td></tr>
+      <tr><td>Đợi lâu</td><td>Hiện thời gian chờ của từng món ngay trên menu.</td></tr>
+      <tr><td>Đổi ý</td><td>Cho sửa đơn trong 2 phút đầu, trước khi bếp nhận.</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 1: Chọn đúng vấn đề</p><h2>4 câu hỏi trước khi nhận một yêu cầu</h2>
+  <div class="fill">
+    <ol class="num lg">
+      <li>Ai gặp vấn đề này? Cụ thể là ai?</li>
+      <li>Lần gần nhất nó xảy ra là khi nào?</li>
+      <li>Bây giờ họ đang tự xoay xở thế nào?</li>
+      <li>Nếu mình không làm gì, ai mất gì?</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide night center">
+  <p class="eyebrow">Phần 2</p><h1>Nghe điều người dùng thật sự cần</h1>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 2: Nghe người dùng</p><h2>Hỏi về chuyện đã xảy ra</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:50%">Câu hỏi dở</th><th>Câu hỏi tốt</th></tr>
+      <tr><td style="font-weight:400">“Bạn có muốn nút hủy món không?”</td><td>“Lần cuối bạn muốn đổi món là khi nào? Bạn đã làm gì?”</td></tr>
+      <tr><td style="font-weight:400">“Bạn có dùng tính năng này không?”</td><td>“Kể lần gần nhất bạn gặp chuyện này.”</td></tr>
+      <tr><td style="font-weight:400">“Ý tưởng này hay không?”</td><td>“Bạn đã thử cách nào khác chưa?”</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 2: Nghe người dùng</p><h2>Người dùng nói giải pháp. Bạn đi tìm vấn đề.</h2>
+  <div class="fill">
+    <div class="cols c3">
+      <div class="col"><h3>Họ nói</h3><p>“Cho tôi nút hủy món.”</p></div>
+      <div class="col"><h3>Họ làm</h3><p>Đợi 15 phút, gọi nhân viên, đổi sang món có sẵn.</p></div>
+      <div class="col alt"><h3 style="color:var(--tomato)">Họ cần</h3><p style="color:var(--ink)">Biết trước món nào ra lâu.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 2: Nghe người dùng</p><h2>AI giúp được tới đâu</h2>
+  <div class="fill">
+    <div class="cols c2">
+      <div class="col"><h3>Giao cho AI</h3><p>Soạn danh sách câu hỏi.</p><p>Tóm tắt ghi chép phỏng vấn.</p><p>Tìm điều lặp lại giữa 20 người.</p></div>
+      <div class="col alt"><h3 style="color:var(--tomato)">Bạn tự làm</h3><p style="color:var(--ink)">Ngồi ở quán lúc 12 giờ trưa và nhìn.</p><p style="color:var(--ink)">Hỏi thêm khi câu trả lời nghe lạ.</p><p style="color:var(--ink)">Quyết câu nào đáng tin.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide night center">
+  <p class="eyebrow">Phần 3</p><h1>Hiểu hệ thống và dòng tiền</h1>
+  <p class="lead soft">Đủ để biết ai đang nói đúng.</p>
+</section>
+
+<section class="slide hot center">
+  <h1 style="font-size:124px">PM nói 2 ngày.<br>Dev nói 3 tuần.<br>Ai đúng?</h1>
+  <p class="lead">Yêu cầu: thêm nút “Hủy món”. Trả lời trong chat: PM, Dev, hoặc Chưa đủ thông tin.</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 3: Hệ thống</p><h2>Một sản phẩm số có 4 phần</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:24%">Phần</th><th style="width:40%">Là gì</th><th style="width:36%">Ở quán</th></tr>
+      <tr><td>Frontend</td><td>Phần người dùng nhìn và bấm</td><td>Thực đơn trên bàn</td></tr>
+      <tr><td>API</td><td>Mẫu giao tiếp giữa các phần</td><td>Phiếu gọi món theo mẫu</td></tr>
+      <tr><td>Backend</td><td>Nơi xử lý theo quy tắc</td><td>Bếp và thu ngân</td></tr>
+      <tr><td>Database</td><td>Nơi lưu dữ liệu lâu dài</td><td>Sổ ghi đơn</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 3: Hệ thống</p><h2>Đi theo một cú bấm “Gọi món”</h2>
+  <div class="fill" style="justify-content:flex-start;gap:36px">
+  <svg viewBox="0 0 1664 170" width="1664" height="170" role="img" aria-label="Yêu cầu đi từ frontend qua API, backend đến database, rồi kết quả quay về">
+    <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#B93710"/></marker></defs>
+    <g fill="#FFFDF7" stroke="#1B2330" stroke-width="4">
+      <rect x="2" y="10" width="320" height="150" rx="14"/><rect x="448" y="10" width="320" height="150" rx="14"/><rect x="894" y="10" width="320" height="150" rx="14"/><rect x="1340" y="10" width="320" height="150" rx="14"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="162" y="80" font-size="38" font-weight="800">Frontend</text><text x="162" y="122" font-size="26">màn hình</text>
+      <text x="608" y="80" font-size="38" font-weight="800">API</text><text x="608" y="122" font-size="26">POST /orders</text>
+      <text x="1054" y="80" font-size="38" font-weight="800">Backend</text><text x="1054" y="122" font-size="26">kiểm tra, tính tiền</text>
+      <text x="1500" y="80" font-size="38" font-weight="800">Database</text><text x="1500" y="122" font-size="26">lưu đơn</text>
+    </g>
+    <g stroke="#B93710" stroke-width="5" fill="none">
+      <path d="M330 62H440" marker-end="url(#a)"/><path d="M776 62H886" marker-end="url(#a)"/><path d="M1222 62H1332" marker-end="url(#a)"/>
+      <path d="M440 112H330" marker-end="url(#a)" stroke-dasharray="10 8"/><path d="M886 112H776" marker-end="url(#a)" stroke-dasharray="10 8"/><path d="M1332 112H1222" marker-end="url(#a)" stroke-dasharray="10 8"/>
+    </g>
+  </svg>
+  <ol class="num sm">
+    <li>Khách bấm “Gọi món”.</li>
+    <li>Frontend gửi yêu cầu tạo đơn qua API.</li>
+    <li>Backend kiểm tra món còn không và tính tiền.</li>
+    <li>Database lưu đơn, trạng thái “chưa trả tiền”.</li>
+    <li>Backend trả mã đơn về, màn hình hiện QR để trả tiền.</li>
+  </ol>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 3: Hệ thống</p><h2>Nút Hủy chạm vào đâu?</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:20%">Phần</th><th style="width:42%">Phải đổi gì</th><th>PM phải quyết</th></tr>
+      <tr><td>Frontend</td><td>Nút, màn xác nhận</td><td>Nút hiện tới lúc nào?</td></tr>
+      <tr><td>API</td><td>Thêm lệnh hủy món</td><td>Ai được hủy: khách, nhân viên?</td></tr>
+      <tr><td>Backend</td><td>Báo bếp, tính lại tiền</td><td>Bếp đã làm rồi thì sao?</td></tr>
+      <tr><td>Database</td><td>Lưu ai hủy, lúc nào</td><td>Cần tra lại khi khách khiếu nại không?</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 3: Dòng tiền</p><h2>Chỗ có tiền đi qua là chỗ dễ sai nhất</h2>
+  <div class="fill">
+    <ol class="num">
+      <li>Khách đã trả tiền chưa?</li>
+      <li>Hoàn tiền bằng cách nào, mất bao lâu?</li>
+      <li>Bên thanh toán báo về chậm thì sao?</li>
+      <li>Khách bấm 2 lần thì có bị trừ 2 lần không?</li>
+    </ol>
+    <p class="ticket">AI ít khi tự hỏi câu số 3. Người từng làm thanh toán hỏi câu này đầu tiên.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 3: Hệ thống</p><h2>Quay lại: ai đúng?</h2>
+  <div class="fill">
+    <div class="cols c2">
+      <div class="col"><h3 style="font-size:72px">2 ngày</h3><p>Chỉ cho hủy khi bếp chưa nhận và khách chưa trả tiền.</p></div>
+      <div class="col alt"><h3 style="font-size:72px;color:var(--tomato)">3 tuần</h3><p>Cho hủy cả khi đã trả. Phải hoàn tiền, báo bếp, sửa báo cáo doanh thu.</p></div>
+    </div>
+    <p class="ticket">Cả hai đúng. Họ đang nói về hai yêu cầu khác nhau.</p>
+    <p class="muted" style="font-size:26px">Số ngày chỉ để minh họa.</p>
+  </div>
+</section>
+
+<section class="slide night center">
+  <h1>Nghỉ 5 phút</h1>
+  <p class="lead soft">Quay lại để quyết, để nói không, và để giao việc cho AI.</p>
+</section>
+
+<section class="slide night center">
+  <p class="eyebrow">Phần 4</p><h1>Quyết khi chưa chắc</h1>
+  <p class="lead soft">Bạn sẽ không bao giờ có đủ dữ liệu.</p>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 4: Quyết định</p><h2>Hỏi trước: quay lại được không?</h2>
+  <div class="fill">
+    <div class="cols c2">
+      <div class="col"><h3>Quay lại được</h3><p>Đổi chữ trên nút, thử 1 tuần ở 1 quán.</p><p style="color:var(--ink)"><b>Quyết nhanh, đo, sửa.</b></p></div>
+      <div class="col alt"><h3 style="color:var(--tomato)">Không quay lại được</h3><p>Xóa dữ liệu đơn, hoàn tiền tự động, hứa ngày với khách.</p><p style="color:var(--ink)"><b>Đi chậm, hỏi thêm người.</b></p></div>
+    </div>
+    <p class="ticket">Đừng họp một tuần cho một quyết định sửa được trong một giờ.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 4: Quyết định</p><h2>Viết quyết định ra trước khi biết kết quả</h2>
+  <div class="fill">
+    <div class="code">Quyết: cho hủy món trong 2 phút đầu.
+Vì: 7 trên 10 khách mình hỏi gọi nhầm ngay lúc đặt.
+Đoán: số lần gọi nhân viên giảm một nửa.
+Xem lại: sau 2 tuần.</div>
+    <p class="muted" style="font-size:26px">Số trong ví dụ chỉ để minh họa.</p>
+  </div>
+</section>
+
+<section class="slide night center">
+  <p class="eyebrow">Phần 5</p><h1>Nói không</h1>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 5: Nói không</p><h2>Dòng quan trọng nhất là “Ngoài phạm vi”</h2>
+  <div class="fill">
+    <div class="code">Trong phạm vi:  hủy khi bếp chưa nhận, khách chưa trả.
+
+Ngoài phạm vi:  hủy sau khi đã trả tiền.
+                hoàn tiền một phần.
+                hủy cả đơn.</div>
+    <p class="ticket">Việc 3 tuần thành việc 2 ngày.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 5: Nói không</p><h2>Nói không mà vẫn giữ được người</h2>
+  <div class="fill">
+    <ol class="num lg">
+      <li>Nói lý do bằng vấn đề của người dùng.</li>
+      <li>Nói khi nào sẽ xem lại.</li>
+      <li>Đưa ra một bản nhỏ hơn làm được ngay.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide night center">
+  <p class="eyebrow">Phần 6</p><h1>Giao việc cho dev và AI agent</h1>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 6: Ở Gaian</p><h2>Nhóm nhỏ, AI viết nhiều code</h2>
+  <div class="fill">
+    <ol class="num lg">
+      <li><span><b>Tối:</b> người viết mục tiêu và thế nào là xong.</span></li>
+      <li><span><b>Đêm:</b> AI agent viết code và chạy test.</span></li>
+      <li><span><b>Sáng:</b> người đọc kết quả, quyết cái nào đi tiếp.</span></li>
+    </ol>
+    <p class="ticket">Sáng ra dùng được hay không là nhờ lời giao việc tối hôm trước.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 6: Giao việc</p><h2>Một lời giao việc tốt có 4 phần</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:30%">Phần</th><th>Trả lời câu hỏi</th></tr>
+      <tr><td>Mục tiêu</td><td>Làm cái này để giải vấn đề gì?</td></tr>
+      <tr><td>Bối cảnh</td><td>Mình đã biết gì, đã thử gì?</td></tr>
+      <tr><td>Xong là gì</td><td>Kiểm tra thế nào thì gọi là xong?</td></tr>
+      <tr><td>Không được đụng</td><td>Phần nào phải giữ nguyên?</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 6: Giao việc</p><h2>Tiêu chí “xong” giờ là bài kiểm tra</h2>
+  <div class="fill">
+    <div style="display:grid;grid-template-columns:1fr 1.45fr;gap:56px">
+      <div class="col"><h3>Mơ hồ</h3><p style="font-size:36px;color:var(--ink)">“Khách có thể hủy món.”</p><p>AI sẽ tự đoán phần còn lại.</p></div>
+      <div class="col alt"><h3 style="color:var(--tomato)">Kiểm tra được</h3><p style="color:var(--ink)"><b>Khi</b> bếp chưa nhận món<br><b>và</b> khách bấm Hủy rồi xác nhận,<br><b>thì</b> món biến khỏi đơn, tổng tiền giảm, màn hình bếp cập nhật trong 5 giây.</p></div>
+    </div>
+    <p class="ticket">Phép thử: ai cũng trả lời được Đạt hoặc Không đạt.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 6: Giao việc</p><h2>Với dev, thêm 3 việc</h2>
+  <div class="fill">
+    <div class="cols c3">
+      <div class="col"><h3>Kể vấn đề trước</h3><p>Dev hiểu vì sao thì đề xuất được cách tốt hơn.</p></div>
+      <div class="col"><h3>Cho xem sớm</h3><p>Hỏi ý kiến trước khi chốt, đừng đợi tới buổi planning.</p></div>
+      <div class="col"><h3>Hỏi phần nào khó</h3><p>Và nghe hết câu trả lời.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Thực hành</p><h2>Đến lượt các bạn: 18 phút</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:14%">Phút</th><th>Việc của nhóm</th></tr>
+      <tr><td>4</td><td>Viết lại vấn đề: ai gặp, gặp gì, bằng chứng nào.</td></tr>
+      <tr><td>4</td><td>Viết 3 câu hỏi cho một người dùng thật.</td></tr>
+      <tr><td>3</td><td>Chọn 1 điều nhóm nói không.</td></tr>
+      <tr><td>4</td><td>Viết 3 điều kiện “xong”, kiểm tra được.</td></tr>
+      <tr><td>3</td><td>Nhờ AI viết spec. Chấm nó bằng 3 điều kiện đó.</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Thực hành</p><h2>Anh hỏi vặn</h2>
+  <div class="fill">
+    <ol class="num">
+      <li>Bạn đã nói chuyện với ai gặp vấn đề này?</li>
+      <li>Vì sao làm cái này trước?</li>
+      <li>Nếu sai thì quay lại được không?</li>
+      <li>Bạn đo bằng con số nào?</li>
+      <li>AI viết sai chỗ nào?</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Bài tập về nhà</p><h2>Chữa bài tập về nhà</h2>
+  <div class="fill">
+    <div class="cols c2">
+      <div class="col"><h3>Bài nổi bật</h3><p><span class="ph">[Bài 1 do BTC gửi trước buổi học]</span></p><p><span class="ph">[Bài 2 do BTC gửi trước buổi học]</span></p></div>
+      <div class="col alt"><h3 style="color:var(--tomato)">3 câu anh hỏi mỗi bài</h3><p style="color:var(--ink)">Vấn đề có đúng không?</p><p style="color:var(--ink)">Cái gì ở ngoài phạm vi?</p><p style="color:var(--ink)">Tiêu chí có chấm được không?</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide night center">
+  <p class="eyebrow">Phần 7</p><h1>Chịu trách nhiệm kết quả</h1>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 7: Kết quả</p><h2>Ship xong chưa phải là xong</h2>
+  <div class="fill">
+    <div class="cols c2">
+      <div class="col"><h3>Việc đã làm</h3><p>Nút Hủy món đã lên app.</p></div>
+      <div class="col alt"><h3 style="color:var(--tomato)">Kết quả</h3><p style="color:var(--ink)">Số lần khách gọi nhân viên giảm, sau 2 tuần.</p></div>
+    </div>
+    <p class="ticket">Chọn con số trước khi build.</p>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Phần 7: Taste</p><h2>Taste luyện được. Tuần này tập 3 việc</h2>
+  <div class="fill">
+    <ol class="num lg">
+      <li>Dùng 1 app mới. Ghi 3 chỗ bạn thích và vì sao.</li>
+      <li>Hỏi 1 người dùng thật về lần gần nhất họ gặp vấn đề.</li>
+      <li>Viết 1 quyết định ra giấy. Xem lại sau 1 tháng.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide">
+  <p class="eyebrow">Tổng kết</p><h2>Mang 3 điều về</h2>
+  <div class="fill">
+    <div class="cols c3">
+      <div class="col"><h3>Hỏi vì sao trước</h3><p>Rồi mới viết, hoặc nhờ AI viết.</p></div>
+      <div class="col"><h3>Biết tiền đi đâu</h3><p>Một cú bấm đi qua 4 phần. Chỗ có tiền là chỗ dễ sai.</p></div>
+      <div class="col"><h3>Viết điều kiện “xong”</h3><p>Dùng nó để chấm cả người lẫn AI.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide night center">
+  <h1>Hỏi đáp</h1>
+  <p class="lead soft mono" style="font-size:34px">kelvin.truong@gaian.network<br>linkedin.com/in/khatruong93</p>
+</section>
+
+</main>
+<div id="notes" aria-live="polite"></div>
+<nav id="ui" aria-label="Điều hướng slide">
+  <button id="prev" aria-label="Trang trước">&#8249;</button><span id="count"></span><button id="next" aria-label="Trang sau">&#8250;</button><button id="nbtn" aria-label="Bật tắt speaker notes">Notes</button><button id="fbtn" aria-label="Toàn màn hình">Full</button>
+</nav>
+<script>
+const slides=[...document.querySelectorAll('.slide')],stage=document.getElementById('stage'),notes=document.getElementById('notes'),count=document.getElementById('count');
+let i=Math.min(Math.max((parseInt(location.hash.slice(1))||1)-1,0),slides.length-1);
+slides.forEach((s,n)=>{if(!s.classList.contains('night')&&!s.classList.contains('hot')){const f=document.createElement('div');f.className='foot';f.innerHTML='<span>H4TF: PM Academy 2026, Tech 1</span><span>'+(n+1)+'</span>';s.appendChild(f)}});
+function fit(){const k=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform='translate('+(innerWidth-1920*k)/2+'px,'+(innerHeight-1080*k)/2+'px) scale('+k+')'}
+function show(n){i=Math.min(Math.max(n,0),slides.length-1);slides.forEach((s,x)=>s.classList.toggle('active',x===i));count.textContent=(i+1)+' / '+slides.length;notes.textContent=slides[i].dataset.notes||'';history.replaceState(null,'','#'+(i+1))}
+document.getElementById('prev').onclick=()=>show(i-1);document.getElementById('next').onclick=()=>show(i+1);
+document.getElementById('nbtn').onclick=()=>notes.classList.toggle('on');
+document.getElementById('fbtn').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}else if(e.key==='n'||e.key==='N')notes.classList.toggle('on');else if(e.key==='f'||e.key==='F')document.getElementById('fbtn').click();else if(e.key==='Home')show(0);else if(e.key==='End')show(slides.length-1)});
+addEventListener('resize',fit);new ResizeObserver(fit).observe(document.documentElement);fit();show(i);
+</script>
+</body>
+</html>
