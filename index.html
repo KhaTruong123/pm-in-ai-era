@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tech 1: Bên trong một sản phẩm số</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+:root{--ink:#1B2330;--paper:#F7F1E5;--paper2:#EDE4D2;--tomato:#B93710;--muted:#56606D;--line:#CFC3AC;--night:#18212E;--cream:#F7F1E5;--soft:#C8CFD8;--peach:#F4A988;--sans:'Be Vietnam Pro',Arial,sans-serif;--mono:'JetBrains Mono','Courier New',monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#0E131B;overflow:hidden;font-family:var(--sans)}
+#stage{position:absolute;left:0;top:0;width:1920px;height:1080px;transform-origin:0 0}
+.slide{position:absolute;inset:0;width:1920px;height:1080px;padding:92px 128px 128px;background:var(--paper);color:var(--ink);display:none;flex-direction:column;gap:40px;overflow:hidden}
+.slide.active{display:flex}
+.slide.night{background:var(--night);color:var(--cream)}
+.slide.hot{background:var(--tomato);color:var(--cream)}
+.slide.center{justify-content:center;padding:128px}
+.eyebrow{font:600 26px/1.2 var(--mono);letter-spacing:.5px;color:var(--tomato);text-transform:uppercase}
+.night .eyebrow{color:var(--peach)}
+h1{font-size:108px;font-weight:800;line-height:1.1;letter-spacing:-1.5px}
+h2{font-size:68px;font-weight:800;line-height:1.14;letter-spacing:-.5px;margin-top:-26px}
+.lead{font-size:40px;line-height:1.35}
+.soft{color:var(--soft)}.muted{color:var(--muted)}
+.foot{position:absolute;left:128px;right:128px;bottom:56px;display:flex;justify-content:space-between;font:400 24px var(--mono);color:var(--muted)}
+.night .foot,.hot .foot{display:none}
+.fill{flex:1;display:flex;flex-direction:column;justify-content:center;gap:40px;min-height:0}
+.cols{display:grid;gap:44px}
+.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}.c4{grid-template-columns:repeat(4,1fr)}
+.col{border-top:8px solid var(--ink);padding-top:24px;display:flex;flex-direction:column;gap:16px}
+.col h3{font-size:40px;font-weight:800;line-height:1.2}
+.col p{font-size:31px;line-height:1.38;color:var(--muted)}
+.col p b{color:var(--ink)}
+.col.alt{border-top-color:var(--tomato)}
+.ticket{background:var(--ink);color:var(--cream);font-size:36px;font-weight:700;line-height:1.32;padding:32px 44px;border-radius:10px}
+ol.num{list-style:none;counter-reset:n;display:flex;flex-direction:column}
+ol.num li{counter-increment:n;display:grid;grid-template-columns:76px 1fr;align-items:baseline;font-size:36px;line-height:1.35;padding:17px 0;border-bottom:2px dashed var(--line)}
+ol.num li:last-child{border-bottom:0}
+ol.num li::before{content:counter(n);font:600 34px var(--mono);color:var(--tomato)}
+ol.num.plain li::before{content:none}
+ol.num.lg li{font-size:44px;padding:22px 0}
+ol.num.sm li{font-size:32px;padding:14px 0;grid-template-columns:60px 1fr}
+table{border-collapse:collapse;width:100%}
+th{font:600 26px var(--mono);text-transform:uppercase;text-align:left;color:var(--tomato);padding:0 24px 14px 0;border-bottom:6px solid var(--ink)}
+td{font-size:33px;line-height:1.3;padding:20px 24px 20px 0;border-bottom:2px solid var(--line);vertical-align:top}
+td:first-child{font-weight:700}
+.receipt{background:#FFFDF7;color:var(--ink);font-family:var(--mono);font-size:29px;line-height:1.5;padding:40px 44px;box-shadow:0 10px 28px rgba(27,35,48,.16);border-top:6px dashed var(--line);border-bottom:6px dashed var(--line)}
+.receipt .t{font-weight:600;text-align:center;padding-bottom:16px;border-bottom:2px dashed var(--line);margin-bottom:16px}
+.receipt .r{display:flex;justify-content:space-between;gap:24px}
+.receipt .total{font-weight:600;margin-top:16px;padding-top:16px;border-top:2px dashed var(--line)}
+.code{background:var(--night);color:var(--cream);font:400 31px/1.55 var(--mono);padding:40px 44px;border-radius:10px;white-space:pre}
+.ph{display:inline-block;background:#FFF0B8;color:#5B4300;border:3px dashed #A67C00;border-radius:8px;padding:2px 12px;font-weight:600}
+.tag{font:600 26px var(--mono);color:var(--tomato)}
+.mono{font-family:var(--mono)}
+svg text{font-family:var(--sans);fill:var(--ink)}
+#ui{position:fixed;right:18px;bottom:14px;display:flex;align-items:center;gap:8px;font:13px var(--mono);color:#E8E2D6;background:rgba(14,19,27,.82);padding:6px 10px;border-radius:8px;z-index:5}
+#ui button{background:transparent;color:inherit;border:1px solid #6A7482;border-radius:6px;min-width:34px;height:30px;cursor:pointer;font:inherit}
+#notes{position:fixed;left:18px;right:220px;bottom:14px;max-height:30vh;overflow:auto;background:rgba(14,19,27,.94);color:#F7F1E5;font:16px/1.45 var(--sans);padding:12px 16px;border-radius:8px;z-index:4;display:none}
+#notes.on{display:block}
+@media print{@page{size:1920px 1080px;margin:0}html,body{height:auto;overflow:visible;background:none}#ui,#notes{display:none!important}#stage{position:static;transform:none!important;width:auto;height:auto}.slide{display:flex!important;position:relative;break-after:page;print-color-adjust:exact;-webkit-print-color-adjust:exact}}
+.tsm td,.tsm th{font-size:29px;padding-top:14px;padding-bottom:14px}
+</style>
+</head>
+<body>
+<main id="stage">
+<section class="slide night center" data-notes="10 phút đầu dành cho BTC khai mạc. Sau đó mình bắt đầu buổi học nhé.">
+  <p class="eyebrow">H4TF: PM Academy 2026, Track Tech, Buổi 1</p>
+  <h1>Bấm một nút trên app, chuyện gì xảy ra?</h1>
+  <p class="lead soft">Sản phẩm số được làm ra thế nào, PM làm việc với dev ra sao. Kelvin Truong, 30/11/2026</p>
+</section>
+
+<section class="slide" data-notes="1 phút: Mình giới thiệu nhanh vậy thôi. Hai buổi của mình có liên quan với nhau, hôm nay các bạn sẽ tập viết spec, còn thứ Sáu mình sẽ dùng chính spec đó để nhờ AI build ngay trên lớp.">
+  <p class="eyebrow">Chào các bạn</p><h2>Mình là Kelvin</h2>
+  <div class="fill"><div style="display:grid;grid-template-columns:400px 1fr;gap:72px;align-items:center">
+    <img src="assets-aiesec/kelvin-profile.png" alt="Kelvin Truong" style="width:400px;height:400px;object-fit:cover;border-radius:24px">
+    <div style="display:flex;flex-direction:column;gap:28px">
+      <p class="lead">Mình không phải dev, nhưng gần như ngày nào cũng làm việc với dev và AI viết code.</p>
+      <ol class="num plain sm">
+        <li style="grid-template-columns:1fr"><span>Founder, COO &amp; CPO tại Gaian, startup làm hạ tầng thanh toán stablecoin ở châu Á.</span></li>
+        <li style="grid-template-columns:1fr"><span>Trước đây là PM tại Hex Trust và Product Owner tại Starpunk.</span></li>
+        <li style="grid-template-columns:1fr"><span>Member của Superteam Vietnam.</span></li>
+      </ol>
+    </div>
+  </div></div>
+</section>
+
+<section class="slide hot center" data-notes="2 phút: Trước khi mình giải thích, các bạn thử đoán xem phía sau màn hình đã xảy ra những gì. Mình chưa bật mí đáp án đâu, lát nữa Session 1 sẽ quay lại câu hỏi này.">
+  <p class="eyebrow">Bắt đầu từ một cú bấm</p>
+  <h1>Bạn đặt đồ ăn trên app, vài giây sau đã có tài xế nhận đơn.</h1>
+  <p class="lead">Trong mấy giây đó, app đã phải làm những gì?</p>
+</section>
+
+<section class="slide" data-notes="3 phút: Trong hai buổi này, mình sẽ dùng một ví dụ xuyên suốt là app gọi món ngay tại bàn. Các bạn cứ hình dung một quán cà phê quen thuộc, mình sẽ giải thích từng phần bằng những thứ các bạn đã thấy ở đó.">
+  <p class="eyebrow">Session 1: Bên trong một sản phẩm số</p><h2>Mở một app ra, bên trong có những gì?</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:22%">Phần</th><th style="width:40%">Làm gì</th><th>Ví dụ ở quán cà phê</th></tr>
+      <tr><td>Frontend</td><td>Màn hình khách nhìn và thao tác</td><td>Menu cầm trên tay</td></tr>
+      <tr><td>API</td><td>Quy ước để các phần trao đổi với nhau</td><td>Phiếu order theo mẫu</td></tr>
+      <tr><td>Backend</td><td>Xử lý theo quy tắc của quán</td><td>Bếp và quầy thu ngân</td></tr>
+      <tr><td>Database</td><td>Lưu thông tin để tra lại</td><td>Sổ ghi đơn</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide" data-notes="3 phút: Nét liền trong sơ đồ là đường yêu cầu đi, còn nét đứt là phần phản hồi quay lại. Các bạn thử nghĩ xem, nếu database ngừng chạy thì khách sẽ nhìn thấy gì trên điện thoại?">
+  <p class="eyebrow">Session 1: Bên trong một sản phẩm số</p><h2>Bạn bấm "Gọi món". App làm gì tiếp theo?</h2>
+  <div class="fill" style="justify-content:flex-start;gap:36px">
+  <svg viewBox="0 0 1664 170" width="1664" height="170" role="img" aria-label="Yêu cầu đi từ frontend qua API, backend đến database, rồi kết quả quay về">
+    <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#B93710"/></marker></defs>
+    <g fill="#FFFDF7" stroke="#1B2330" stroke-width="4">
+      <rect x="2" y="10" width="320" height="150" rx="14"/><rect x="448" y="10" width="320" height="150" rx="14"/><rect x="894" y="10" width="320" height="150" rx="14"/><rect x="1340" y="10" width="320" height="150" rx="14"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="162" y="80" font-size="38" font-weight="800">Frontend</text><text x="162" y="122" font-size="26">màn hình</text>
+      <text x="608" y="80" font-size="38" font-weight="800">API</text><text x="608" y="122" font-size="26">POST /orders</text>
+      <text x="1054" y="80" font-size="38" font-weight="800">Backend</text><text x="1054" y="122" font-size="26">kiểm tra, tính tiền</text>
+      <text x="1500" y="80" font-size="38" font-weight="800">Database</text><text x="1500" y="122" font-size="26">lưu đơn</text>
+    </g>
+    <g stroke="#B93710" stroke-width="5" fill="none">
+      <path d="M330 62H440" marker-end="url(#a)"/><path d="M776 62H886" marker-end="url(#a)"/><path d="M1222 62H1332" marker-end="url(#a)"/>
+      <path d="M440 112H330" marker-end="url(#a)" stroke-dasharray="10 8"/><path d="M886 112H776" marker-end="url(#a)" stroke-dasharray="10 8"/><path d="M1332 112H1222" marker-end="url(#a)" stroke-dasharray="10 8"/>
+    </g>
+  </svg>
+  <ol class="num sm">
+      <li>Bạn chạm vào nút "Gọi món" trên điện thoại.</li>
+      <li>App gửi thông tin đơn theo mẫu API.</li>
+      <li>Backend kiểm tra món còn hay hết, rồi tính tiền.</li>
+      <li>Database lưu đơn và ghi trạng thái "Chưa trả tiền".</li>
+      <li>App nhận mã đơn và hiện mã QR để bạn thanh toán.</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide" data-notes="4 phút: PM nên hiểu phần này vì nó liên quan trực tiếp tới chi phí vận hành mỗi tháng. Server gặp sự cố thì khách của mình ở nhiều nơi có thể cùng lúc không dùng được app.">
+  <p class="eyebrow">Session 1: Bên trong một sản phẩm số</p><h2>Những phần đó chạy ở đâu?</h2>
+  <div class="fill">
+    <div class="cols c3">
+      <div class="col"><h3>Client</h3><p>Điện thoại hoặc trình duyệt của bạn. Frontend chạy ở đây.</p></div>
+      <div class="col"><h3>Server</h3><p>Máy tính chạy liên tục để nhận yêu cầu. Backend và database nằm ở đây.</p></div>
+      <div class="col alt"><h3>Cloud</h3><p>Mình thuê server của Amazon hay Google và trả tiền theo mức sử dụng.</p></div>
+    </div>
+    <p class="lead muted">Cứ hình dung như thuê bếp theo giờ, thay vì tự xây một căn bếp riêng.</p>
+  </div>
+</section>
+
+<section class="slide" data-notes="5 phút: Đây là cách mình có thể hình dung những việc xảy ra sau cú bấm đặt đơn lúc đầu. Một app thường có phần tự xây và phần dùng dịch vụ bên ngoài, nên dịch vụ bên ngoài gặp sự cố thì app của mình cũng có thể bị ảnh hưởng.">
+  <p class="eyebrow">Quay lại câu hỏi ban đầu</p><h2>Khi bạn bấm "Đặt đơn" trên app giao đồ ăn</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:22%">Phần</th><th>Thường làm những gì</th></tr>
+      <tr><td>Frontend</td><td>Hiện giỏ hàng, phí giao hàng và nút Đặt đơn</td></tr>
+      <tr><td>Backend</td><td>Tính phí giao, báo quán và tìm tài xế gần đó</td></tr>
+      <tr><td>Database</td><td>Lưu đơn hàng, địa chỉ và lịch sử đặt món</td></tr>
+      <tr><td>Đi thuê</td><td>Dùng bản đồ, cổng thanh toán và dịch vụ báo tài xế</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide" data-notes="4 phút: Các bạn chỉ cần vẽ sơ đồ đơn giản trên giấy, chưa cần đẹp hay đúng kỹ thuật. Buổi sau mình sẽ dùng AI build thử theo đúng những phần các bạn vừa vẽ.">
+  <p class="eyebrow">Vẽ sơ đồ</p><h2>Sơ đồ cho app gọi món tại bàn</h2>
+  <div class="fill" style="justify-content:flex-start;gap:28px">
+  <svg viewBox="0 0 1664 480" width="1664" height="480" role="img" aria-label="App khách và màn bếp cùng nối tới backend. Backend nối tới database và cổng thanh toán bên ngoài">
+    <defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#B93710"/></marker></defs>
+    <g fill="#FFFDF7" stroke="#1B2330" stroke-width="4">
+      <rect x="2" y="20" width="360" height="150" rx="14"/><rect x="2" y="310" width="360" height="150" rx="14"/>
+      <rect x="652" y="165" width="360" height="150" rx="14"/><rect x="1302" y="20" width="360" height="150" rx="14"/>
+      <rect x="1302" y="310" width="360" height="150" rx="14" stroke-dasharray="14 10"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="182" y="88" font-size="36" font-weight="800">App của khách</text><text x="182" y="130" font-size="26">quét QR trên bàn</text>
+      <text x="182" y="378" font-size="36" font-weight="800">Màn hình bếp</text><text x="182" y="420" font-size="26">máy tính bảng ở quầy</text>
+      <text x="832" y="233" font-size="36" font-weight="800">Backend + API</text><text x="832" y="275" font-size="26">tạo đơn, tính tiền</text>
+      <text x="1482" y="88" font-size="36" font-weight="800">Database</text><text x="1482" y="130" font-size="26">đơn, món, bàn</text>
+      <text x="1482" y="378" font-size="36" font-weight="800">Cổng thanh toán</text><text x="1482" y="420" font-size="26">đi thuê, QR</text>
+    </g>
+    <g stroke="#B93710" stroke-width="5" fill="none">
+      <path d="M372 105L642 215" marker-start="url(#b)" marker-end="url(#b)"/>
+      <path d="M372 375L642 265" marker-start="url(#b)" marker-end="url(#b)"/>
+      <path d="M1022 215L1292 105" marker-start="url(#b)" marker-end="url(#b)"/>
+      <path d="M1022 265L1292 375" marker-start="url(#b)" marker-end="url(#b)" stroke-dasharray="10 8"/>
+    </g>
+  </svg>
+  <p class="muted" style="font-size:30px">Chốt bốn điều: ai dùng, dùng màn nào, lưu dữ liệu gì và kết nối dịch vụ ngoài nào. Nét đứt là phần đi thuê.</p>
+  </div>
+</section>
+
+<section class="slide" data-notes="7 phút: Các bạn tự nghĩ trong 4 phút trước, rồi mình mời một vài bạn chia sẻ, có thể nói trực tiếp hoặc chat tùy cách lớp đang học. Một luồng có thể là app khách gửi yêu cầu tới Backend, qua cổng thanh toán, rồi Backend nhận kết quả, Database chuyển đơn sang Đã trả và màn hình bếp hiện đơn.">
+  <p class="eyebrow">Tới lượt bạn: 7 phút</p><h2>Khách bấm "Trả tiền". Lệnh này đi qua đâu?</h2>
+  <div class="fill">
+    <ol class="num">
+      <li>Ai bấm nút, và bấm trên màn hình nào?</li>
+      <li>Yêu cầu được gửi tới đâu trước tiên?</li>
+      <li>Hệ thống cần kết nối với bên nào bên ngoài?</li>
+      <li>Cần lưu lại thông tin gì và đổi trạng thái nào?</li>
+      <li>Ai cần biết khách đã trả tiền: khách, bếp hay cả hai?</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide" data-notes="4 phút: Mình từng gặp trường hợp hệ thống chuyển tiền bị lặp vì đối tác gửi kết quả về chậm. Lúc đó spec không sai câu chữ nào, nhưng team đã bỏ qua một câu hỏi rất quan trọng là phải làm gì khi kết quả chưa về đúng lúc.">
+  <p class="eyebrow">Tiền</p><h2>Cứ đụng tới tiền là phải hỏi kỹ</h2>
+  <div class="fill">
+    <ol class="num">
+      <li>Khách đã thực sự trả tiền chưa?</li>
+      <li>Nếu hoàn tiền thì làm thế nào, bao lâu mới nhận được?</li>
+      <li>Cổng thanh toán báo kết quả chậm thì xử lý ra sao?</li>
+      <li>Khách bấm hai lần, có bị trừ tiền hai lần không?</li>
+    </ol>
+    <p class="lead muted">Người mới thường chưa nghĩ tới chuyện báo kết quả chậm. Người làm thanh toán lâu năm sẽ hỏi câu đó ngay từ đầu.</p>
+  </div>
+</section>
+
+<section class="slide hot center" data-notes="2 phút: Các bạn thử chọn xem mình nghiêng về phía PM hay dev. Nhớ một chi tiết của quán này nhé, khách đã trả tiền ngay lúc gọi món rồi.">
+  <p class="eyebrow">Một tình huống ở quán</p>
+  <h1>Chủ quán muốn nút "Hủy món". PM nói 2 ngày, dev bảo 3 tuần.</h1>
+  <p class="lead">Theo các bạn, ai đang tính đúng?</p>
+</section>
+
+<section class="slide" data-notes="2 phút: Phần này các bạn đã học ở Foundation rồi, nên mình chỉ nhắc lại một chút thôi. Dù spec viết kỹ đến đâu, nếu mình hiểu sai điều khách thực sự cần thì vẫn đang giải sai vấn đề.">
+  <p class="eyebrow">Nhắc lại từ Foundation</p><h2>Khách muốn nút Hủy, nhưng họ đang cần điều gì?</h2>
+  <div class="fill">
+    <div class="cols c3">
+      <div class="col"><h3>Bấm nhầm</h3><p>Chọn sai món, có thể chỉ cần hỏi lại khách trước khi gửi đơn.</p></div>
+      <div class="col"><h3>Chờ lâu</h3><p>Món ra chậm nên khách muốn bỏ. Thêm nút Hủy có thể làm bếp rối hơn.</p></div>
+      <div class="col alt"><h3>Đổi ý</h3><p>Trường hợp này thì khách thực sự cần một cách để hủy món.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notes="4 phút: Ở cả hai cách, khách đều đã trả tiền bằng QR lúc gọi món và bếp vẫn chưa bắt đầu làm. Vì vậy, trước khi bàn chuyện mất 2 ngày hay 3 tuần, mình cần hỏi rõ mọi người đang nói về cách hủy nào. Hai mốc thời gian này chỉ dùng để minh họa cho sự khác nhau giữa hai cách làm.">
+  <p class="eyebrow">Quay lại câu hỏi</p><h2>Vậy ai đúng?</h2>
+  <div class="fill">
+    <table class="tsm">
+      <tr><th style="width:18%">Phần</th><th style="width:38%">A: Nhân viên hủy, trả tiền mặt</th><th>B: Khách tự hủy, app hoàn tiền</th></tr>
+      <tr><td>Frontend</td><td>Thêm nút Hủy trên màn hình bếp</td><td>Thêm nút Hủy và màn xác nhận trên app khách</td></tr>
+      <tr><td>Backend</td><td>Báo bếp bỏ món</td><td>Báo bếp, tính tiền hoàn và tạo yêu cầu hoàn tiền</td></tr>
+      <tr><td>Database</td><td>Ghi lại ai hủy và hủy lúc nào</td><td>Lưu thêm giao dịch hoàn tiền</td></tr>
+      <tr><td>Đi thuê</td><td>Không cần kết nối dịch vụ ngoài</td><td>Gửi yêu cầu hoàn tiền qua cổng thanh toán</td></tr>
+      <tr><td></td><td style="font-weight:800">Khoảng 2 ngày</td><td style="font-weight:800;color:var(--tomato)">Khoảng 3 tuần</td></tr>
+    </table>
+    <p class="ticket">Cả hai đều có lý. Họ chỉ đang hình dung hai cách hủy món khác nhau.</p>
+  </div>
+</section>
+
+<section class="slide night center" data-notes="5 phút: Mình cho cả lớp nghỉ một chút nhé. Hết giờ mình sẽ quay lại với phần làm việc cùng dev.">
+  <p class="eyebrow">Nghỉ 5 phút</p>
+  <h1>Lát nữa mình quay lại nói chuyện làm việc với dev.</h1>
+</section>
+
+<section class="slide night center" data-notes="Mình chuyển sang Session 2 nhé. Phần này mình sẽ đi theo hành trình của một tính năng, từ lúc mới có ý tưởng cho tới khi người dùng có thể sử dụng nó.">
+  <p class="eyebrow">Session 2</p>
+  <h1>Làm việc cùng dev</h1>
+  <p class="lead soft">Từ lúc có ý tưởng đến khi tính năng tới tay người dùng.</p>
+</section>
+
+<section class="slide" data-notes="4 phút: Ở Day 5 các bạn đã học Agile, nên mình chỉ nhắc lại là mỗi sprint cũng sẽ đi qua một vòng như thế này. Mình chia sẻ phần này từ trải nghiệm làm việc thực tế của mình.">
+  <p class="eyebrow">Vòng đời một tính năng (SDLC)</p><h2>Một tính năng sẽ đi qua những ai?</h2>
+  <div class="fill">
+    <table class="tsm">
+      <tr><th style="width:24%">Bước</th><th style="width:22%">Ai làm chính</th><th>PM cần làm gì</th></tr>
+      <tr><td>1. Yêu cầu</td><td>PM</td><td>Nói rõ vấn đề và điều kiện để xem là xong</td></tr>
+      <tr><td>2. Thiết kế</td><td>Designer, dev</td><td>Góp ý và hỏi những chỗ khó</td></tr>
+      <tr><td>3. Build</td><td>Dev</td><td>Trả lời kịp thời, hạn chế đổi yêu cầu giữa chừng</td></tr>
+      <tr><td>4. Test</td><td>QC</td><td>Để QC kiểm tra theo spec đã thống nhất</td></tr>
+      <tr><td>5. Ra mắt</td><td>Dev, PM</td><td>Chọn nhóm dùng trước và chuẩn bị cách quay lại</td></tr>
+      <tr><td>6. Đo, học</td><td>PM</td><td>Xem kết quả rồi quyết định vòng sau làm gì</td></tr>
+    </table>
+    <p class="lead muted">Bắt được lỗi từ bước 1 thường chỉ cần sửa spec, để tới bước 5 có thể mất cả tiền lẫn khách.</p>
+  </div>
+</section>
+
+<section class="slide" data-notes="5 phút: Ảnh là trang plan cho tính năng kiểm soát thẻ, tenant đặt giới hạn chi tiêu cho từng thẻ. Mình đọc và duyệt từng luật trên trang này trước khi AI viết code, rồi chấm code theo đúng các luật đó. Ví dụ khi sửa lỗi nạp tiền vào thẻ, team chạy thử toàn bộ trên bản sao dữ liệu trước khi đụng tới khách thật. Mình không đi vào số tiền hay tên đối tác ở đây.">
+  <p class="eyebrow">Chuyện ở Gaian</p><h2>Mình không đọc code, làm sao biết code có đúng không?</h2>
+  <div class="fill"><div style="display:grid;grid-template-columns:1fr 1.05fr;gap:56px;align-items:center">
+    <ol class="num sm">
+      <li><span>Nói rõ thế nào là xong trước khi bắt đầu làm.</span></li>
+      <li><span>Yêu cầu viết test cùng lúc với code.</span></li>
+      <li><span>Chạy thử trên bản sao dữ liệu rồi mới dùng với khách thật.</span></li>
+    </ol>
+    <figure style="display:flex;flex-direction:column;gap:14px">
+      <img src="assets-aiesec/feature-plan-sample.png" alt="Trang plan tính năng kiểm soát thẻ" style="width:100%;border-radius:10px;box-shadow:0 10px 28px rgba(27,35,48,.18)">
+      <figcaption class="muted" style="font-size:24px">Trang plan một tính năng của Gaian, mình đọc và duyệt trước khi AI viết code.</figcaption>
+    </figure>
+  </div></div>
+</section>
+
+<section class="slide" data-notes="4 phút: Mình muốn dev hiểu vấn đề để cùng tìm cách làm, chứ không phải chỉ nhận một danh sách yêu cầu rồi làm theo. Những lúc có thay đổi, mình cũng nên nói rõ việc nào sẽ phải lùi lại để team cùng thống nhất.">
+  <p class="eyebrow">Làm việc với dev</p><h2>Làm sao để dev cùng nghĩ, thay vì chỉ nhận việc?</h2>
+  <div class="fill">
+    <div class="cols c2" style="row-gap:48px">
+      <div class="col"><h3>Kể rõ vấn đề</h3><p>Khi hiểu mục tiêu, dev có thể nghĩ ra cách giải quyết tốt hơn.</p></div>
+      <div class="col"><h3>Cho xem bản nháp</h3><p>Hỏi ý kiến khi mọi thứ còn đang phác thảo, đừng đợi tới buổi planning.</p></div>
+      <div class="col alt"><h3>Hỏi chỗ khó</h3><p>Có phần nào khó không? Có cách nào đơn giản hơn mà vẫn giải quyết được không?</p></div>
+      <div class="col alt"><h3>Thêm gì, bớt gì</h3><p>Muốn thêm việc giữa chừng thì cùng chốt việc nào sẽ chuyển sang sau.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notes="2 phút: Mình sẽ nhờ AI viết một bản spec ngay trên màn hình để cả lớp cùng xem. Đọc qua có vẻ chuyên nghiệp đấy, nhưng &quot;thành công&quot; cụ thể là thế nào, &quot;an toàn&quot; nghĩa là gì, và đưa cho QC thì họ sẽ test ra sao?">
+  <p class="eyebrow">Thử nhờ AI</p><h2>AI viết spec trong 30 giây. Các bạn thấy dùng được chưa?</h2>
+  <div class="fill">
+    <div class="code">User story: Là khách tại bàn, tôi muốn gọi món qua app,
+            để không phải đợi nhân viên.
+AC1: Khách gọi món thành công.
+AC2: Hệ thống xử lý thanh toán an toàn.
+Edge case: lỗi mạng, lỗi thanh toán.</div>
+  </div>
+</section>
+
+<section class="slide" data-notes="3 phút: Phần 1 các bạn đã học ở Foundation rồi. Hôm nay mình sẽ tập trung nhiều hơn vào các phần từ 3 tới 6, vì đây là những phần giúp team biết chính xác cần làm và kiểm tra điều gì.">
+  <p class="eyebrow">Spec 1 trang</p><h2>Trong một tờ spec, mình cần ghi những gì?</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:34%">Phần</th><th>Cần trả lời câu hỏi nào?</th></tr>
+      <tr><td>1. Vấn đề, phạm vi</td><td>Mình đang giải quyết chuyện gì, và không làm gì?</td></tr>
+      <tr><td>2. User story</td><td>Ai muốn làm gì, để đạt được điều gì?</td></tr>
+      <tr><td>3. Acceptance criteria</td><td>Đến mức nào thì được tính là xong?</td></tr>
+      <tr><td>4. Edge case</td><td>Nếu có tình huống bất thường thì sao?</td></tr>
+      <tr><td>5. Dữ liệu cần lưu</td><td>Sau này mình cần tra lại những gì?</td></tr>
+      <tr><td>6. Tracking event</td><td>Làm sao biết người dùng có sử dụng?</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide" data-notes="4 phút: Đây là slide mình muốn các bạn nhớ nhất trong buổi hôm nay. Mình sẽ đưa câu &quot;Khách trả tiền thành công&quot; ra và nhờ cả lớp sửa lại theo mẫu trên, sao cho dev và QC đều biết phải kiểm tra điều gì.">
+  <p class="eyebrow">Acceptance criteria</p><h2>Viết thế nào để ai đọc cũng biết đạt hay chưa?</h2>
+  <div class="fill">
+    <div style="display:grid;grid-template-columns:1fr 1.45fr;gap:56px">
+      <div class="col"><h3>Kiểu mơ hồ</h3><p style="color:var(--ink)">"Khách gọi món thành công." Dev, QC và AI có thể hiểu mỗi người một kiểu.</p></div>
+      <div class="col alt"><h3 style="color:var(--tomato)">Kiểu chấm được</h3><p style="color:var(--ink)">Có 2 ly trong giỏ, khách bấm Gọi món. Trong 5 giây bếp thấy đơn và số bàn, khách nhận mã đơn.</p></div>
+    </div>
+    <p class="ticket">Mẫu câu: Khi [tình huống], và [bạn làm gì], thì [kết quả nhìn thấy được].</p>
+  </div>
+</section>
+
+<section class="slide" data-notes="4 phút: Khi viết spec, các bạn thử nghĩ thêm những chuyện có thể xảy ra ngoài luồng bình thường. Mình không cần xử lý tất cả ngay trong phiên bản đầu, nhưng phải chủ động quyết định chuyện nào cần làm và chuyện nào có thể để sau.">
+  <p class="eyebrow">Edge case</p><h2>Nếu có chuyện ngoài dự tính thì sao?</h2>
+  <div class="fill">
+    <div class="cols c2" style="row-gap:20px">
+      <ol class="num sm"><li>Đang thao tác thì mất mạng?</li><li>Khách lỡ tay bấm hai lần?</li><li>Giỏ hàng trống, hoặc món vừa hết?</li></ol>
+      <ol class="num sm" style="counter-reset:n 3"><li>Trưa thứ Bảy, 30 bàn cùng gọi món?</li><li>Cổng thanh toán phản hồi chậm?</li><li>Bàn bên cạnh lại hủy món của bàn mình?</li></ol>
+    </div>
+    <p class="lead muted">Không cần giải quyết hết ngay, nhưng phải rõ việc nào làm trước và việc nào để sau.</p>
+  </div>
+</section>
+
+<section class="slide" data-notes="4 phút: Ở Day 2 các bạn đã học funnel rồi, tracking event là cách mình thu thập số liệu cho funnel đó. Nhờ những sự kiện này, mình có thể nhìn ra khách thường dừng lại ở bước nào.">
+  <p class="eyebrow">Dữ liệu và tracking event</p><h2>App ra mắt rồi, mình cần theo dõi những gì?</h2>
+  <div class="fill">
+    <div class="cols c2">
+      <div class="col"><h3>Lưu lại để còn tra</h3><p><b>Mã đơn, số bàn:</b> để bếp mang món đúng bàn.</p><p><b>Món, giá:</b> để cuối ngày đối chiếu tiền.</p><p><b>Trạng thái, giờ đổi:</b> để biết món bị chậm ở khâu nào.</p><p><b>Mã giao dịch:</b> để tra khi khách báo bị trừ tiền hai lần.</p></div>
+      <div class="col alt"><h3>Đếm để hiểu khách</h3><p><b class="mono">xem_menu:</b> có bao nhiêu bàn quét QR?</p><p><b class="mono">them_vao_gio:</b> món nào được chọn nhiều?</p><p><b class="mono">bam_goi_mon:</b> có bao nhiêu người bỏ giỏ?</p><p><b class="mono">tra_tien_xong:</b> có bao nhiêu đơn thanh toán xong?</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-notes="3 phút: Đây là spec mẫu cho app gọi món mà mình đã dùng từ đầu buổi. Mình cố ý viết có 2 AC thôi để các nhóm thấy vẫn còn nhiều tình huống chưa được mô tả và cần bổ sung.">
+  <p class="eyebrow">Spec mẫu</p><h2>Gọi món và trả tiền ngay tại bàn</h2>
+  <div class="fill">
+    <div class="code" style="font-size:25px">Vấn đề:  Giờ trưa khách phải chờ lâu mới gọi được món. Quán chỉ có 2
+         nhân viên.
+Phạm vi: Gọi món và trả tiền bằng QR. Lần này chưa làm hủy món hay chia
+         hóa đơn.
+Story:   Là khách tại bàn, tôi muốn quét QR để gọi món và trả tiền, để
+         khỏi phải đợi nhân viên.
+AC1:     Khi giỏ có 2 ly và khách bấm Gọi món, trong 5 giây bếp thấy
+         đơn có số bàn, khách thấy mã đơn.
+AC2:     Khi khách trả tiền xong, đơn chuyển sang trạng thái Đã trả
+         trên cả 2 màn hình.
+Edge:    Mất mạng lúc bấm Gọi món. Khách bấm 2 lần. Món hết giữa chừng.
+Lưu:     Mã đơn, số bàn, món, số lượng, tổng tiền, trạng thái, giờ đổi.
+Event:   xem_menu, them_vao_gio, bam_goi_mon, tra_tien_xong.</div>
+  </div>
+</section>
+
+<section class="slide" data-notes="2 phút: Trước khi gửi spec cho dev hay AI, các bạn dành một chút thời gian tự kiểm tra lại bằng những câu này. Nếu còn câu nào chưa trả lời được thì quay lại bổ sung trước đã.">
+  <p class="eyebrow">Tự kiểm tra</p><h2>Trước khi gửi spec, thử tự hỏi những câu này</h2>
+  <div class="fill">
+    <ol class="num sm">
+      <li>Vấn đề có bằng chứng, hay mới chỉ là mình đoán?</li>
+      <li>Mình đã nói rõ lần này không làm gì chưa?</li>
+      <li>Từng câu acceptance criteria đã chấm được đạt hay chưa?</li>
+      <li>Đã nghĩ tới mất mạng, bấm hai lần và chuyện tiền chưa?</li>
+      <li>Nếu khách khiếu nại, mình có đủ dữ liệu để tra không?</li>
+      <li>Mỗi event có giúp trả lời một câu hỏi cụ thể không?</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide" data-notes="17 phút: Các nhóm làm việc trong breakout room nhé. Ngoài spec mẫu, mỗi nhóm chọn thêm một tính năng để đưa vào, có thể là gọi thêm món, ghi chú cho món hoặc gọi nhân viên.">
+  <p class="eyebrow">Làm theo nhóm</p><h2>Tới lượt các bạn: 17 phút</h2>
+  <div class="fill">
+    <table>
+      <tr><th style="width:14%">Phút</th><th>Nhóm làm gì</th></tr>
+      <tr><td>4</td><td>Viết user story và 3 acceptance criteria theo mẫu Khi, và, thì.</td></tr>
+      <tr><td>4</td><td>Tìm 4 edge case, chọn 1 cái cần xử lý ngay.</td></tr>
+      <tr><td>3</td><td>Ghi dữ liệu cần lưu và 3 event.</td></tr>
+      <tr><td>6</td><td>Nhờ AI viết spec, chấm theo 6 câu rồi sửa chỗ thiếu.</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="slide" data-notes="6 phút: Mình sẽ thử đóng vai dev và QC hơi khó tính một chút để hỏi kỹ bài của hai nhóm. Mình sẽ nói điểm tốt trước, sau đó mới hỏi những chỗ chưa rõ hoặc còn thiếu.">
+  <p class="eyebrow">Cùng xem bài</p><h2>Cùng xem hai nhóm đã làm gì</h2>
+  <div class="fill">
+    <ol class="num lg">
+      <li>QC sẽ kiểm tra acceptance criteria số 2 như thế nào?</li>
+      <li>Mất mạng lúc trả tiền thì khách nhìn thấy gì?</li>
+      <li>Phần nhóm thêm vào ảnh hưởng tới những chỗ nào?</li>
+      <li>AI hiểu sai ở đâu, prompt của nhóm còn thiếu gì?</li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide" data-notes="1 phút: Trước buổi thứ Sáu, các bạn hoàn thiện spec rồi gửi BTC theo hạn đã chốt nhé. Nhớ thử Google AI Studio trước để buổi sau mình có thể bắt tay vào build luôn.">
+  <p class="eyebrow">Trước thứ Sáu, 4/12</p><h2>Mang spec của nhóm tới buổi sau</h2>
+  <div class="fill">
+    <ol class="num">
+      <li><span>Hoàn thiện spec 1 trang, gửi BTC đúng hạn.</span></li>
+      <li><span>Đăng nhập Google AI Studio bằng tài khoản Google, thử một câu bất kỳ.</span></li>
+      <li><span>Buổi sau mình sẽ build ngay trên lớp, có thể dùng spec của nhóm bạn.</span></li>
+    </ol>
+  </div>
+</section>
+
+<section class="slide" data-notes="1 phút: Trước khi kết thúc, mình muốn các bạn nhớ ba điều này. Sau buổi hôm nay, khi làm việc với dev, hãy thử bắt đầu bằng việc nói rõ vấn đề và viết ra thế nào mới được tính là xong.">
+  <p class="eyebrow">Nếu chỉ nhớ 3 điều</p><h2>Những điều nên mang theo sau buổi học</h2>
+  <div class="fill">
+    <div class="cols c3">
+      <div class="col"><h3>Một cú bấm qua nhiều phần</h3><p>Hiểu nó đi qua những đâu thì sẽ hiểu vì sao dev cần 3 tuần.</p></div>
+      <div class="col"><h3>Dev cùng làm với mình</h3><p>Nói rõ vấn đề trước, rồi cùng hỏi xem chỗ nào khó.</p></div>
+      <div class="col alt"><h3>Spec là đề kiểm tra</h3><p>Viết sao để ai đọc cũng chấm được đạt hay chưa, kể cả AI.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide night center" data-notes="15 phút: Phần còn lại mình dành để trả lời câu hỏi của các bạn. Cứ hỏi thoải mái, kể cả những điều nghe có vẻ rất cơ bản nhé.">
+  <p class="eyebrow">Hỏi đáp</p>
+  <h1>Các bạn cứ hỏi điều mình đang thắc mắc</h1>
+  <p class="lead soft">kelvin.truong@gaian.network, linkedin.com/in/khatruong93</p>
+</section>
+</main>
+<div id="notes" aria-live="polite"></div>
+<nav id="ui" aria-label="Điều hướng slide">
+  <button id="prev" aria-label="Trang trước">&#8249;</button><span id="count"></span><button id="next" aria-label="Trang sau">&#8250;</button><button id="nbtn" aria-label="Bật tắt speaker notes">Notes</button><button id="fbtn" aria-label="Toàn màn hình">Full</button>
+</nav>
+<script>
+const slides=[...document.querySelectorAll('.slide')],stage=document.getElementById('stage'),notes=document.getElementById('notes'),count=document.getElementById('count');
+let i=Math.min(Math.max((parseInt(location.hash.slice(1))||1)-1,0),slides.length-1);
+slides.forEach((s,n)=>{if(!s.classList.contains('night')&&!s.classList.contains('hot')){const f=document.createElement('div');f.className='foot';f.innerHTML='<span>H4TF: PM Academy 2026, Tech 1</span><span>'+(n+1)+'</span>';s.appendChild(f)}});
+function fit(){const k=Math.min(innerWidth/1920,innerHeight/1080);stage.style.transform='translate('+(innerWidth-1920*k)/2+'px,'+(innerHeight-1080*k)/2+'px) scale('+k+')'}
+function show(n){i=Math.min(Math.max(n,0),slides.length-1);slides.forEach((s,x)=>s.classList.toggle('active',x===i));count.textContent=(i+1)+' / '+slides.length;notes.textContent=slides[i].dataset.notes||'';history.replaceState(null,'','#'+(i+1))}
+document.getElementById('prev').onclick=()=>show(i-1);document.getElementById('next').onclick=()=>show(i+1);
+document.getElementById('nbtn').onclick=()=>notes.classList.toggle('on');
+document.getElementById('fbtn').onclick=()=>document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();
+addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();show(i+1)}else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}else if(e.key==='n'||e.key==='N')notes.classList.toggle('on');else if(e.key==='f'||e.key==='F')document.getElementById('fbtn').click();else if(e.key==='Home')show(0);else if(e.key==='End')show(slides.length-1)});
+addEventListener('resize',fit);new ResizeObserver(fit).observe(document.documentElement);fit();show(i);
+</script>
+</body>
+</html>
